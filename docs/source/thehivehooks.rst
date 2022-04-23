@@ -228,20 +228,20 @@ Configure TheHiveHooks
     | 
     | # FREE EXAMPLE OF A FUNCTION YOU COULD USE WITH THEHIVEHOOKS TO AUTOMATE THINGS IN THEHIVE -- like ensuring when people add a Task Log that single line breaks appear like single line breaks. It can mess with Code Blocks and Tables, however.
     | def taskDoubleBreak(event):
-    |     if 'message' in event['details'] and '\n' in event['details']['message']:
+    |     if 'message' in event['details'] and '\\n' in event['details']['message']:
     |         # // Prevent infinite loops by filtering out Webhook-made Updates
     |         if not 'updatedBy' in event['object'] or ('updatedBy' in event['object'] and not str(event['object']['updatedBy']).endswith("thehive.local")):
     |             log_id = event['objectId']
-    |             original_msg = event['details']['message'] + '\n\n###### _Automatically Converted Single to Double Line Break_'
+    |             original_msg = event['details']['message'] + '\\n\\n###### _Automatically Converted Single to Double Line Break_'
     | 
     |             # // Check if an Adjustment is needed to avoid unnecessary Updates
-    |             regexPattern = re.compile('(?<!\n)\n(?!\n)')
+    |             regexPattern = re.compile('(?<!\\n)\\n(?!\\n)')
     |             regexResults = regexPattern.findall(original_msg)
     |             app.logger.info('Single Breaks Found: {}'.format(len(regexResults)))
     | 
     |             if len(regexResults) > 0:
     |                 app.logger.info('Task Log Line Break Adjustment')
-    |                 adjusted_msg = re.sub(r'(?<!\n)\n(?!\n)','\n\n', original_msg)
+    |                 adjusted_msg = re.sub(r'(?<!\\n)\\n(?!\\n)','\\n\\n', original_msg)
     | 
     |                 ctask_url = "http://127.0.0.1:9000/api/case/task/log/" + log_id
     |                 ctask_criteria = {"message":adjusted_msg}

@@ -95,32 +95,177 @@ Configure TheHiveHooks
  
 24. Edit the launcher: vi /opt/TheHiveHooks/thehive_hooks/__init__.py
 
-   * TODO
+   | from flask import Flask
+   | import logging
+   | from logging.handlers import RotatingFileHandler
+   | import os
+   | from pyee import EventEmitter
+   | 
+   | # Declare the logger
+   | app_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+   | pathLog = app_dir + '/thehive-hooks.log'
+   | handler = RotatingFileHandler(pathLog, maxBytes=10000000, backupCount=1)
+   | handler.setLevel(logging.INFO)
+   | handler.setFormatter(logging.Formatter(
+   |     '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+   | ))
+   | 
+   | # Initialize the app
+   | app = Flask(__name__)
+   | # Gunicorn
+   | if __name__ == '__main__':
+   |     # // App called directly - flask or CLI
+   |     app.logger.addHandler(handler)
+   | else:
+   |     # // App called by gunicorn
+   |     gunicorn_logger = logging.getLogger('gunicorn.error')
+   |     app.logger.handlers = gunicorn_logger.handlers
+   |     # // Use logging level specified by gunicorn conf
+   |     app.logger.setLevel(gunicorn_logger.level)
+   | 
+   | app.url_map.strict_slashes = False
+   | 
+   | ## Declare the event emitter
+   | ee = EventEmitter()
+   | 
+   | import thehive_hooks.controllers
+   | import thehive_hooks.handlers
 
 25. Edit the script: vi /opt/TheHiveHooks/thehive_hooks/handlers.py
 
-   * TODO
- 
-   * The full list of Event Types identified so far include:
-     
-      - 'AlertCreation',
-      - 'AlertUpdate',
-      - 'CaseArtifactCreation', #Hive3
-      - 'CaseArtifactCreate', #Hive4
-      - 'CaseArtifactJobCreation',
-      - 'CaseArtifactJobUpdate',
-      - 'CaseArtifactJobUpdate',
-      - 'CaseArtifactUpdate',
-      - 'CaseCreation' #Hive3
-      - 'CaseCreate', #Hive4
-      - 'CaseTaskCreation', #Hive3
-      - 'CaseTaskCreate', #Hive4
-      - 'CaseTaskLogCreation', #Hive3
-      - 'CaseTaskLogCreate', #Hive4
-      - 'CaseTaskLogUpdate',
-      - 'CaseTaskUpdate',
-      - 'CaseUpdate',
-      - 'CaseDelete'
+    | import json
+    | from thehive_hooks import app
+    | from thehive_hooks import ee
+    | 
+    | from thehive4py.api import TheHiveApi
+    | from thehive4py.models import *
+    | from thehive4py.query import *
+    | 
+    | # // For URL or API Calls
+    | import urllib
+    | # // RegEx for TaskLog
+    | import re
+    | # // ElasticSearch Action-Reaction requires 1 second pause between them.
+    | from time import sleep
+    | # // For Epoch to Human Time Conversion
+    | from datetime import datetime
+    | # // Email Sending
+    | import smtplib
+    | from email.mime.text import MIMEText
+    | from email.mime.multipart import MIMEMultipart
+    | from email.header import Header
+    | from email.utils import formataddr
+    | 
+    | # // Key Store
+    | from keyrings.cryptfile.cryptfile import CryptFileKeyring
+    | kr = CryptFileKeyring()
+    | kr.keyring_key = "**KEYRINGPASSWORD**"
+    | # See def: hive4ApiByOrg
+    | 
+    | # #################################################
+    | # // GLOBAL VARIABLES
+    | link_host = "https://**THEHIVEFQDNHERE**"
+    | 
+    | sender_displayname = "TheHive"
+    | sender_email = "**FROMADDRESS@DOMAIN.ORG**"
+    | email_server = "**EMAILSERVER**:25"
+    | 
+    | 
+    | # #################################################
+    | # // WEBHOOK EE-FN CONNECTOR
+    | def make_handler_func(event_name):
+    |     @ee.on(event_name)
+    |     def _handler(event):
+    |         app.logger.info('Handle {}: Event={}'.format(event_name, json.dumps(event, indent=4, sort_keys=True)))
+    | 
+    |     return _handler
+    | 
+    | # // WEBHOOK SUPPORTED EVENTS
+    | events = [
+    |     'AlertCreation',
+    |     'AlertUpdate',
+    |     'CaseArtifactCreation', #Hive3
+    |     'CaseArtifactCreate', #Hive4
+    |     'CaseArtifactJobCreation',
+    |     'CaseArtifactJobUpdate',
+    |     'CaseArtifactJobUpdate',
+    |     'CaseArtifactUpdate',
+    |     'CaseCreation', #Hive3
+    |     'CaseCreate', #Hive4
+    |     'CaseTaskCreation', #Hive3
+    |     'CaseTaskCreate', #Hive4
+    |     'CaseTaskLogCreation', #Hive3
+    |     'CaseTaskLogCreate', #Hive4
+    |     'CaseTaskLogUpdate',
+    |     'CaseTaskUpdate',
+    |     'CaseUpdate',
+    |     'CaseDelete'
+    | ]
+    | 
+    | # // WEBHOOK DEFINE SUPPORTED EE.ON FN
+    | for e in events:
+    |     make_handler_func(e)
+    | 
+    | # #################################################
+    | # // GENERAL FUNCTIONS
+    | def hive4ApiByOrg(event_organisation):
+    |     global api
+    |     global thehive_apikey
+    | 
+    |     app.logger.info('Case Org: {}'.format(event_organisation))
+    | 
+    |     if event_organisation == '**ORG1NAME**':
+    |         thehive_apikey = kr.get_password("**ORG1APIUSERNAME**", "API")
+    |         app.logger.info('Case API Key: **ORG1NAME** Used: {}'.format(thehive_apikey[0:5]))
+    |     elif event_organisation == '**ORG2NAME**':
+    |         thehive_apikey = kr.get_password("**ORG2APIUSERNAME**", "API")
+    |         app.logger.info('Case API Key: **ORG2NAME** Used: {}'.format(thehive_apikey[0:5]))
+    |     elif event_organisation == '**ORG3NAME**':
+    |         thehive_apikey = kr.get_password("**ORG3APIUSERNAME**", "API")
+    |         app.logger.info('Case API Key: **ORG3NAME** Used: {}'.format(thehive_apikey[0:5]))
+    |     elif event_organisation == '**ORG4NAME**':
+    |         thehive_apikey = kr.get_password("**ORG4APIUSERNAME**", "API")
+    |         app.logger.info('Case API Key: **ORG4NAME** Used: {}'.format(thehive_apikey[0:5]))
+    |     else:
+    |         app.logger.info('Case API Key: Unknown for Org {}'.format(event_organisation))
+    | 
+    |     api = TheHiveApi(url='http://127.0.0.1:9000', principal=thehive_apikey, version='4')
+    | 
+    | 
+    | 
+    | def taskDoubleBreak(event):
+    |     if 'message' in event['details'] and '\n' in event['details']['message']:
+    |         # // Prevent infinite loops by filtering out Webhook-made Updates
+    |         if not 'updatedBy' in event['object'] or ('updatedBy' in event['object'] and not str(event['object']['updatedBy']).endswith("thehive.local")):
+    |             log_id = event['objectId']
+    |             original_msg = event['details']['message'] + '\n\n###### _Automatically Converted Single to Double Line Break_'
+    | 
+    |             # // Check if an Adjustment is needed to avoid unnecessary Updates
+    |             regexPattern = re.compile('(?<!\n)\n(?!\n)')
+    |             regexResults = regexPattern.findall(original_msg)
+    |             app.logger.info('Single Breaks Found: {}'.format(len(regexResults)))
+    | 
+    |             if len(regexResults) > 0:
+    |                 app.logger.info('Task Log Line Break Adjustment')
+    |                 adjusted_msg = re.sub(r'(?<!\n)\n(?!\n)','\n\n', original_msg)
+    | 
+    |                 ctask_url = "http://127.0.0.1:9000/api/case/task/log/" + log_id
+    |                 ctask_criteria = {"message":adjusted_msg}
+    |                 ctask_json = json.dumps(ctask_criteria).encode('utf8')
+    |                 ctask_auth = 'Bearer ' + thehive_apikey
+    |                 ctask_request = urllib.request.Request(ctask_url, data=ctask_json, headers={'Authorization':ctask_auth,'Content-Type':'application/json'}, method='PATCH')
+    |                 urllib.request.urlopen(ctask_request)
+    | 
+    | @ee.on('CaseTaskLogCreate')
+    | #TheHive 4 Version
+    | def taskLogCreationHook(event):
+    |     # Dynamically changes the global 'api' variable value to include the correct API Key based on the Organization name.
+    |     hive4ApiByOrg(event['organisation'])
+    | 
+    |     case_guid = event['rootId']
+    | 
+    |     if 'message' in event['details'] and '\n' in event['details']['message']:
+    |         taskDoubleBreak(event)
 
 Starting TheHiveHooks
 ^^^^^^^^^^^^^^^^^^^^^
@@ -148,7 +293,68 @@ Starting TheHiveHooks
       
    d. Create the startup script: vi /etc/rc.d/init.d/supervisord
    
-      * TODO
+        | #!/bin/sh
+        | #
+        | # /etc/rc.d/init.d/supervisord
+        | #
+        | # Supervisor is a client/server system that
+        | # allows its users to monitor and control a
+        | # number of processes on UNIX-like operating
+        | # systems.
+        | #
+        | # chkconfig: - 64 36
+        | # description: Supervisor Server
+        | # processname: supervisord
+        | 
+        | # Source init functions
+        | . /etc/rc.d/init.d/functions
+        | 
+        | prog="supervisord"
+        | 
+        | prefix="/usr/local"
+        | exec_prefix="${prefix}"
+        | prog_bin="${exec_prefix}/bin/supervisord"
+        | PIDFILE="/var/run/$prog.pid"
+        | 
+        | start()
+        | {
+        |       echo -n $"Starting $prog: "
+        |       daemon $prog_bin --pidfile $PIDFILE
+        |       [ -f $PIDFILE ] && success $"$prog startup" || failure $"$prog startup"
+        |       echo
+        | }
+        | 
+        | stop()
+        | {
+        |       echo -n $"Shutting down $prog: "
+        |       [ -f $PIDFILE ] && killproc $prog || success $"$prog shutdown"
+        |       echo
+        | }
+        | 
+        | case "$1" in
+        | 
+        |  start)
+        |    start
+        |  ;;
+        | 
+        |  stop)
+        |    stop
+        |  ;;
+        | 
+        |  status)
+        |       status $prog
+        |  ;;
+        | 
+        |  restart)
+        |    stop
+        |    start
+        |  ;;
+        | 
+        |  *)
+        |    echo "Usage: $0 {start|stop|restart|status}"
+        |  ;;
+        | 
+        | esac
       
    e. Allow the startup script to execute (function): chmod +x /etc/rc.d/init.d/supervisord
    f. Add the startup script to startup: chkconfig --add supervisord
@@ -219,4 +425,5 @@ Enabling TheHiveHooks in TheHive
       
          | {"path":"notification","defaultValue":[],"value":[{"delegate":false,"trigger":{"name":"AnyEvent"},"notifier":{"name":"webhook","endpoint":"local"}}]}
          
-36. Test that your TheHiveHook code works as expected in TheHive.
+36. Exit the Sudo Su Elevation: logout
+37. Test that your TheHiveHook code works as expected in TheHive.

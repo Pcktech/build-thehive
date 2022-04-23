@@ -2,7 +2,7 @@
 
 # -- Project information
 
-project = 'StrageHiveDocs'
+project = 'StrangeHiveDocs'
 copyright = '2022, Pcktech'
 author = 'Pcktech'
 

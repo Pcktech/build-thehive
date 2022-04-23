@@ -6,7 +6,7 @@ TheHiveHooks
 Requirements
 ------------
 
-The following instructions are based on CentOS7 and Oracle Enterprise Linux 8.
+The following instructions are based on CentOS7 and Oracle Enterprise Linux 8, and assumes TheHiveHooks is installed on the same server as TheHive.
 
 - TheHive 4.x
 - Python 3.6

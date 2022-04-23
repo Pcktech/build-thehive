@@ -21,5 +21,5 @@ Contents
 
 .. toctree::
 
-   usage
+   thehivehooks
    api

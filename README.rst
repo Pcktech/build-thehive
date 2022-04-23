@@ -1,9 +1,4 @@
-Template for the Read the Docs tutorial
+TheHive Build Docs and Lessons Learned
 =======================================
 
-This GitHub template includes fictional Python library
-with some basic Sphinx docs.
-
-Read the tutorial here:
-
-https://docs.readthedocs.io/en/stable/tutorial/
+This GitHub template includes Sphinx docs for ReadTheDocs https://pck-build-thehive.readthedocs.io/en/latest/index.html

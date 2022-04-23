@@ -399,7 +399,7 @@ Enabling TheHiveHooks in TheHive
 
    * If the service fails to start, verify the application.conf modification didn't remove anything or if there's a typo in any new configuration added.
    
-35. For **each** organization where you want TheHiveHooks activated/functioning, you must perform the following steps to finish enabling TheHiveHooks using the API key of the org-admin account created earlier:
+35. For **each** organization where you want TheHiveHooks activated/functioning, you must perform the following steps to finish enabling TheHiveHooks using the API key of the org-admin account (with a username unique to that organization) that was created earlier:
 
    a. Securely enter the API Key so it isn't plastered all over your command history: read -s -p 'Enter the API Key: ' thehive_apikey
    b. Use the following command to instruct TheHive to use TheHiveHooks for the organization of the account used to run the command:

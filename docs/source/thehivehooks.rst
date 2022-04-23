@@ -226,6 +226,7 @@ Configure TheHiveHooks
     | 
     |     api = TheHiveApi(url='http://127.0.0.1:9000', principal=thehive_apikey, version='4')
     | 
+    | # FREE EXAMPLE OF A FUNCTION YOU COULD USE WITH THEHIVEHOOKS TO AUTOMATE THINGS IN THEHIVE -- like ensuring when people add a Task Log that single line breaks appear like single line breaks. It can mess with Code Blocks and Tables, however.
     | def taskDoubleBreak(event):
     |     if 'message' in event['details'] and '\n' in event['details']['message']:
     |         # // Prevent infinite loops by filtering out Webhook-made Updates
@@ -259,7 +260,7 @@ Configure TheHiveHooks
     | 
     |     case_guid = event['rootId']
     | 
-    |     if 'message' in event['details'] and '\n' in event['details']['message']:
+    |     if 'message' in event['details'] and '\\n' in event['details']['message']:
     |         taskDoubleBreak(event)
 
 Starting TheHiveHooks

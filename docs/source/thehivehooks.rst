@@ -273,9 +273,9 @@ Starting TheHiveHooks
    b. Copy-Paste configuration into file:
    
       | /var/log/thehivehooks/thehivehooks.access.log /var/log/thehivehooks/thehivehooks.err.log /var/log/thehivehooks/thehivehooks.out.log {
-      | size 1M
-      | dateext
-      | rotate 10
+      |    size 1M
+      |    dateext
+      |    rotate 10
       | }
       
 28. Configure Supervisord to Startup:

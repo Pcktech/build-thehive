@@ -1,4 +1,4 @@
-Welcome to PCKTech's 'So You Want To Build A Strange Bee Hive...'
+So You Want To Build A Strange Bee Hive...
 ===================================
 
 **TheHive** is an Incident Response Platform enabling documentation and coordination of identification and response to cyber threats.

@@ -167,15 +167,6 @@ Configure TheHiveHooks
     | # See def: hive4ApiByOrg
     | 
     | # #################################################
-    | # // GLOBAL VARIABLES
-    | link_host = "https://**THEHIVEFQDNHERE**"
-    | 
-    | sender_displayname = "TheHive"
-    | sender_email = "**FROMADDRESS@DOMAIN.ORG**"
-    | email_server = "**EMAILSERVER**:25"
-    | 
-    | 
-    | # #################################################
     | # // WEBHOOK EE-FN CONNECTOR
     | def make_handler_func(event_name):
     |     @ee.on(event_name)
@@ -235,8 +226,6 @@ Configure TheHiveHooks
     | 
     |     api = TheHiveApi(url='http://127.0.0.1:9000', principal=thehive_apikey, version='4')
     | 
-    | 
-    | 
     | def taskDoubleBreak(event):
     |     if 'message' in event['details'] and '\n' in event['details']['message']:
     |         # // Prevent infinite loops by filtering out Webhook-made Updates
@@ -260,6 +249,8 @@ Configure TheHiveHooks
     |                 ctask_request = urllib.request.Request(ctask_url, data=ctask_json, headers={'Authorization':ctask_auth,'Content-Type':'application/json'}, method='PATCH')
     |                 urllib.request.urlopen(ctask_request)
     | 
+    | # #################################################
+    | # TRIGGERED EVENTS THAT CALL FUNCTIONS OR PERFORM ACTIONS
     | @ee.on('CaseTaskLogCreate')
     | #TheHive 4 Version
     | def taskLogCreationHook(event):

@@ -11,6 +11,10 @@ The following instructions are based on CentOS7 and Oracle Enterprise Linux 8.
 - TheHive 4.x
 - Python 3.6
 - TheHive4Py 1.8.1+
+- Command Line/Terminal access to TheHive server
+- Root/Sudo access at the Command Line/Terminal on TheHive server
+- Internet/Web access from TheHive Server (or local copies of all packages reference for localinstall)
+- TheHive 4.x org-admin role/profile for desired organizations
 
 .. _Installation
 

@@ -10,7 +10,7 @@ The following instructions are based on CentOS7 and Oracle Enterprise Linux 8.
 
 - TheHive 4.x
 - Python 3.6
-- TheHive4Py 1.x
+- TheHive4Py 1.8.1+
 
 .. _Installation
 

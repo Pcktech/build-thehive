@@ -40,8 +40,8 @@ Install Supporting Packages
     a. Set: git config --global http.proxy http://**IPADDRESS**:**PORT**
     b. Verify: git config --global --get-regex http.*
     
- Install TheHiveHooks
- ^^^^^^^^^^^^^^^^^^^^
+Install TheHiveHooks
+^^^^^^^^^^^^^^^^^^^^
  
 8. Log in to TheHive's Web UI as an org-admin for the desired organization (or to the 'admin' organization):
 

@@ -14,7 +14,7 @@ how to :ref:`installation` the project.
 
 .. note::
 
-   This project is under active development. Documentation viewable on ReadTheDocs.
+   This documentation is under active development. A-Z Setup Guide for TheHive 4 exists as a Word doc, but need to sanitize and convert.
 
 Contents
 --------

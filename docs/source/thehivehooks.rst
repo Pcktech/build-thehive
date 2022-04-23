@@ -373,8 +373,8 @@ Starting TheHiveHooks
 30. Start Supervisord: service supervisord start
 31. Check Supervisord's status: supervisorctl status
 
-   * If 'thehivehooks' shows 'STARTING' for more than 3 seconds there's most likely a problem with TheHiveHooks' __init__.py or handlers.py, or with the Supervisord conf files.
-   * Anytime you modifer your handlers.py code, you must restart supervisord to apply the code changes: supervisorctl restart -- and you should **always** verify it doesn't get stuck 'STARTING' because of a typo in your code change.
+   * If 'thehivehooks' shows 'STARTING' for more than 3 seconds there's most likely a problem with TheHiveHooks' __init__.py or handlers.py, or with the Supervisord conf files. Check the applicable log files for error messages.
+   * Anytime you modify your handlers.py code, you must restart supervisord to apply the code changes: supervisorctl restart -- and you should **always** verify it doesn't get stuck 'STARTING' because of a typo in your code change.
    
 Enabling TheHiveHooks in TheHive
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

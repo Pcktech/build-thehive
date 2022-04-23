@@ -379,7 +379,7 @@ Starting TheHiveHooks
 Enabling TheHiveHooks in TheHive
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-32. Edit TheHive's configuration to enable use of Webhooks: vi /etc/thehive/application.conf
+32. Edit TheHive's configuration to call on Gunicorn's Port (which is running TheHiveHooks): vi /etc/thehive/application.conf
 
    a. Scroll to the bottom and make sure the following block exists, or add it:
    
